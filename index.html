@@ -35,7 +35,25 @@
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">Welding Weight Calculator</h2>
             
             <form id="calculationForm" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Grade Input -->
+                    <div>
+                        <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+                        <select id="grade" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Grade</option>
+                            <option value="A.S P11">A.S P11</option>
+                            <option value="A.S P22">A.S P22</option>
+                            <option value="C.S">C.S</option>
+                            <option value="C.S Galv">C.S Galv</option>
+                            <option value="Monel 400">Monel 400</option>
+                            <option value="SS 304">SS 304</option>
+                            <option value="SS 304L">SS 304L</option>
+                            <option value="SS 304L/C.S">SS 304L/C.S</option>
+                            <option value="SS 316L">SS 316L</option>
+                            <option value="SS 321">SS 321</option>
+                            <option value="SS 321H">SS 321H</option>
+                        </select>
+                    </div>
                     <!-- J Type Input -->
                     <div>
                         <label for="jType" class="block text-sm font-medium text-gray-700 mb-1">J Type</label>
@@ -103,6 +121,9 @@
                 <div class="flex space-x-2">
                     <button id="exportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center">
                         <i class="fas fa-file-export mr-2"></i> Export
+                    </button>
+                    <button id="exportAggregatedBtn" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition flex items-center">
+                        <i class="fas fa-calculator mr-2"></i> Export Aggregated
                     </button>
                     <button id="clearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition flex items-center">
                         <i class="fas fa-trash-alt mr-2"></i> Clear All
