@@ -103,12 +103,7 @@
 
         <!-- Results Section -->
         <section id="resultsSection" class="hidden bg-white rounded-xl shadow-md p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800">Calculation Results</h2>
-                <button id="whatsappBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center">
-                    <i class="fab fa-whatsapp mr-2"></i> Share
-                </button>
-            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Calculation Results</h2>
             <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Results will be displayed here -->
             </div>
@@ -118,19 +113,17 @@
         <section class="bg-white rounded-xl shadow-md p-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Calculation History</h2>
             <div class="flex space-x-2 mb-6">
-                <div class="flex space-x-2">
-                    <button id="exportBtn" class="bg-green-500 text-white p-2 w-10 h-10 rounded hover:bg-green-600 transition flex items-center justify-center">
-                        <i class="fas fa-file-excel"></i>
-                    </button>
-                    <button id="whatsappBtn" class="bg-green-600 text-white p-2 w-10 h-10 rounded hover:bg-green-700 transition flex items-center justify-center">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                </div>
-                <button id="exportAggregatedBtn" class="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition flex items-center">
-                    <i class="fas fa-file-excel mr-2"></i> Summary
+                <button id="exportBtn" class="bg-green-500 text-white p-2 w-10 h-10 rounded hover:bg-green-600 transition flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
                 </button>
-                <button id="clearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-                    Clear
+                <button id="exportAggregatedBtn" class="bg-purple-500 text-white p-2 w-10 h-10 rounded hover:bg-purple-600 transition flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+                <button id="whatsappBtn" class="bg-green-600 text-white p-2 w-10 h-10 rounded hover:bg-green-700 transition flex items-center justify-center">
+                    <i class="fab fa-whatsapp"></i>
+                </button>
+                <button id="clearAllBtn" class="bg-red-500 text-white p-2 w-10 h-10 rounded hover:bg-red-600 transition flex items-center justify-center">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
             
