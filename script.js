@@ -33,7 +33,14 @@ class PipeCalculator {
     this.calculationForm.addEventListener('submit', (e) => this.handleSubmit(e));
     this.exportBtn.addEventListener('click', () => this.exportHistory());
     this.clearAllBtn.addEventListener('click', () => this.clearAllHistory());
-    this.whatsappBtn.addEventListener('click', () => this.shareOnWhatsApp());
+    this.whatsappBtn.addEventListener('click', async () => {
+      try {
+        await this.shareOnWhatsApp();
+      } catch (err) {
+        console.error('WhatsApp share error:', err);
+        alert('Could not share via WhatsApp. Please try again.');
+      }
+    });
     
     // Handle quantity input focus/blur
     this.quantityInput.addEventListener('focus', () => {
@@ -48,23 +55,47 @@ class PipeCalculator {
     });
   }
 
-  shareOnWhatsApp() {
+  async shareOnWhatsApp() {
     if (!this.resultsContainer.hasChildNodes()) {
       return alert('No results to share');
     }
-    
-    let message = '🔧 Welding Weight Calculation Results:\n\n';
-    const resultCards = this.resultsContainer.querySelectorAll('.result-card');
-    
-    resultCards.forEach(card => {
-      const title = card.querySelector('h3').textContent;
-      const value = card.querySelector('p.text-2xl').textContent;
-      const calculation = card.querySelector('p.text-sm').textContent;
-      message += `${title}: ${value}\n${calculation}\n\n`;
-    });
 
-    const encodedMessage = encodeURIComponent(message.trim());
-    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+    // Create summary file
+    const history = JSON.parse(localStorage.getItem('pipeCalculations')) || [];
+    if (!history.length) return alert('No history to share');
+    
+    const csv = [
+      'Timestamp,Grade,J Type,N-SIZE,Thickness,Joints,Filler Ф2#4 (KG),Elec# Ф2#5 (KG),Elec# Ф3#25 (KG),Elec# Ф4 (KG),Electrode,Filler',
+      ...history.map(item => `"${item.timestamp}",${item.grade},${item.jType || ''},${item.nSize},${item.thickness},${item.quantity},${
+        Object.entries(item.results)
+          .filter(([k]) => !['Electrode', 'Filler'].includes(k))
+          .map(([_,v]) => v || 0)
+          .join(',')
+      },${item.results.Electrode},${item.results.Filler}`)
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const file = new File([blob], 'welding_summary.csv', { type: 'text/csv' });
+
+    // Create share data
+    const shareData = {
+      title: 'Welding Summary',
+      text: 'Check out my welding calculations summary',
+      files: [file]
+    };
+
+    try {
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback for desktop
+        const url = URL.createObjectURL(blob);
+        window.open(`https://web.whatsapp.com/send?text=Check%20out%20my%20welding%20calculations%20summary&file=${url}`, '_blank');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      alert('Sharing failed. Please try again.');
+    }
   }
 
   // ... [rest of the existing methods remain exactly the same] ...
