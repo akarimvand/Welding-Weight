@@ -253,39 +253,31 @@ class PipeCalculator {
     this.saveToHistory(grade, pipe, results, quantity);
   }
 
-  displayResults(grade, pipe, results, quantity) {
-    this.resultsContainer.innerHTML = '';
-    // Show weight calculations
-    Object.entries(results)
-      .filter(([k, v]) => parseFloat(v) > 0 && !['Electrode', 'Filler'].includes(k))
-      .forEach(([key, val]) => {
-        const card = document.createElement('div');
-        card.className = 'result-card bg-gray-50 p-4 rounded-lg border border-gray-200';
-        card.innerHTML = `
-          <h3 class="font-semibold text-gray-700">${key}</h3>
-          <p class="text-2xl font-bold text-blue-600 mt-2">${val} KG</p>
-          <p class="text-sm text-gray-500 mt-1">
-            ${pipe[key]} KG/joint × ${quantity} joints = ${val} KG
-          </p>`;
-        this.resultsContainer.appendChild(card);
-      });
-    
-    // Show Electrode and Filler info
-    const infoCard = document.createElement('div');
-    infoCard.className = 'result-card bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4';
-    infoCard.innerHTML = `
-      <h3 class="font-semibold text-blue-700">Material Information</h3>
-      <div class="grid grid-cols-2 gap-4 mt-2">
-        <div>
-          <p class="text-sm text-gray-600">Electrode:</p>
-          <p class="font-medium">${this.gradeData[grade].electrode}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Filler:</p>
-          <p class="font-medium">${this.gradeData[grade].filler}</p>
-        </div>
-      </div>`;
-    this.resultsContainer.appendChild(infoCard);
+    displayResults(grade, pipe, results, quantity) {
+        this.resultsContainer.innerHTML = '';
+        // Show weight calculations with material info
+        Object.entries(results)
+            .filter(([k, v]) => parseFloat(v) > 0)
+            .forEach(([key, val]) => {
+                const card = document.createElement('div');
+                card.className = 'result-card bg-gray-50 p-4 rounded-lg border border-gray-200';
+                
+                let additionalInfo = '';
+                if (key.includes('Filler')) {
+                    additionalInfo = `<p class="text-sm text-gray-500 mt-1">Filler: ${this.gradeData[grade].filler}</p>`;
+                } else if (key.includes('Elec#')) {
+                    additionalInfo = `<p class="text-sm text-gray-500 mt-1">Electrode: ${this.gradeData[grade].electrode}</p>`;
+                }
+                
+                card.innerHTML = `
+                    <h3 class="font-semibold text-gray-700">${key}</h3>
+                    <p class="text-2xl font-bold text-blue-600 mt-2">${val} KG</p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        ${pipe[key]} KG/joint × ${quantity} joints = ${val} KG
+                    </p>
+                    ${additionalInfo}`;
+                this.resultsContainer.appendChild(card);
+            });
     this.resultsSection.classList.remove('hidden');
   }
 
