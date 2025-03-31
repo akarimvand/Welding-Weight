@@ -35,7 +35,7 @@ class PipeCalculator {
     this.clearAllBtn.addEventListener('click', () => this.clearAllHistory());
     this.whatsappBtn.addEventListener('click', async () => {
       try {
-        await this.shareOnWhatsApp();
+        await this.exportAndShareAggregated();
       } catch (err) {
         console.error('WhatsApp share error:', err);
         alert('Could not share via WhatsApp. Please try again.');
@@ -55,32 +55,48 @@ class PipeCalculator {
     });
   }
 
-  async shareOnWhatsApp() {
-    if (!this.resultsContainer.hasChildNodes()) {
-      return alert('No results to share');
-    }
-
-    // Create summary file
+  async exportAndShareAggregated() {
     const history = JSON.parse(localStorage.getItem('pipeCalculations')) || [];
     if (!history.length) return alert('No history to share');
-    
+
+    // Group by Electrode and Filler
+    const aggregated = {};
+    history.forEach(item => {
+      const key = `${item.results.Electrode}|${item.results.Filler}`;
+      if (!aggregated[key]) {
+        aggregated[key] = {
+          electrode: item.results.Electrode,
+          filler: item.results.Filler,
+          totalJoints: parseFloat(item.quantity),
+          totalFiller: parseFloat(item.results['Filler Ф2#4'] || 0),
+          totalElectrode: parseFloat(item.results['Elec# Ф2#5'] || 0) + 
+                        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
+                        parseFloat(item.results['Elec# Ф4'] || 0)
+        };
+      } else {
+        aggregated[key].totalJoints += parseFloat(item.quantity);
+        aggregated[key].totalFiller += parseFloat(item.results['Filler Ф2#4'] || 0);
+        aggregated[key].totalElectrode += parseFloat(item.results['Elec# Ф2#5'] || 0) + 
+                                        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
+                                        parseFloat(item.results['Elec# Ф4'] || 0);
+      }
+    });
+
+    // Convert to CSV
     const csv = [
-      'Timestamp,Grade,J Type,N-SIZE,Thickness,Joints,Filler Ф2#4 (KG),Elec# Ф2#5 (KG),Elec# Ф3#25 (KG),Elec# Ф4 (KG),Electrode,Filler',
-      ...history.map(item => `"${item.timestamp}",${item.grade},${item.jType || ''},${item.nSize},${item.thickness},${item.quantity},${
-        Object.entries(item.results)
-          .filter(([k]) => !['Electrode', 'Filler'].includes(k))
-          .map(([_,v]) => v || 0)
-          .join(',')
-      },${item.results.Electrode},${item.results.Filler}`)
+      'Electrode,Filler,Total Joints,Total Filler (KG),Total Electrode (KG)',
+      ...Object.values(aggregated).map(item => 
+        `"${item.electrode}","${item.filler}",${item.totalJoints},${item.totalFiller.toFixed(2)},${item.totalElectrode.toFixed(2)}`
+      )
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const file = new File([blob], 'welding_summary.csv', { type: 'text/csv' });
+    const file = new File([blob], 'welding_aggregated.csv', { type: 'text/csv' });
 
     // Create share data
     const shareData = {
-      title: 'Welding Summary',
-      text: 'Check out my welding calculations summary',
+      title: 'Welding Aggregated Summary',
+      text: 'Check out my aggregated welding calculations',
       files: [file]
     };
 
@@ -90,7 +106,7 @@ class PipeCalculator {
       } else {
         // Fallback for desktop
         const url = URL.createObjectURL(blob);
-        window.open(`https://web.whatsapp.com/send?text=Check%20out%20my%20welding%20calculations%20summary&file=${url}`, '_blank');
+        window.open(`https://web.whatsapp.com/send?text=Check%20out%20my%20aggregated%20welding%20calculations&file=${url}`, '_blank');
       }
     } catch (err) {
       console.error('Error sharing:', err);
