@@ -18,6 +18,7 @@ class PipeCalculator {
     this.historyContainer = document.getElementById('historyContainer');
     this.exportBtn = document.getElementById('exportBtn');
     this.clearAllBtn = document.getElementById('clearAllBtn');
+    this.whatsappBtn = document.getElementById('whatsappBtn');
   }
 
   initEventListeners() {
@@ -29,7 +30,41 @@ class PipeCalculator {
     this.calculationForm.addEventListener('submit', (e) => this.handleSubmit(e));
     this.exportBtn.addEventListener('click', () => this.exportHistory());
     this.clearAllBtn.addEventListener('click', () => this.clearAllHistory());
+    this.whatsappBtn.addEventListener('click', () => this.shareOnWhatsApp());
+    
+    // Handle quantity input focus/blur
+    this.quantityInput.addEventListener('focus', () => {
+      if (this.quantityInput.value === '1') {
+        this.quantityInput.value = '';
+      }
+    });
+    this.quantityInput.addEventListener('blur', () => {
+      if (this.quantityInput.value === '') {
+        this.quantityInput.value = '1';
+      }
+    });
   }
+
+  shareOnWhatsApp() {
+    if (!this.resultsContainer.hasChildNodes()) {
+      return alert('No results to share');
+    }
+    
+    let message = '🔧 Welding Weight Calculation Results:\n\n';
+    const resultCards = this.resultsContainer.querySelectorAll('.result-card');
+    
+    resultCards.forEach(card => {
+      const title = card.querySelector('h3').textContent;
+      const value = card.querySelector('p.text-2xl').textContent;
+      const calculation = card.querySelector('p.text-sm').textContent;
+      message += `${title}: ${value}\n${calculation}\n\n`;
+    });
+
+    const encodedMessage = encodeURIComponent(message.trim());
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  }
+
+  // ... [rest of the existing methods remain exactly the same] ...
 
   clearAllHistory() {
     if (confirm('Are you sure you want to clear all history?')) {
