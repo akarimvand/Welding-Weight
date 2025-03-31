@@ -85,7 +85,12 @@
 
         <!-- Results Section -->
         <section id="resultsSection" class="hidden bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Calculation Results</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Calculation Results</h2>
+                <button id="whatsappBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center">
+                    <i class="fab fa-whatsapp mr-2"></i> Share
+                </button>
+            </div>
             <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Results will be displayed here -->
             </div>
