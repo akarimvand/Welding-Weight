@@ -1,6 +1,30 @@
 // Welding Weight Calculator Application
 
 class PipeCalculator {
+  roundToThreeDecimals(value) {
+    return parseFloat(parseFloat(value).toFixed(3));
+  }
+
+  updateAggregatedValues(aggregated, item, isNew = false) {
+    const newItem = {
+      ...aggregated,
+      totalJoints: isNew 
+        ? parseFloat(item.quantity)
+        : aggregated.totalJoints + parseFloat(item.quantity),
+      totalFiller: this.roundToThreeDecimals(
+        (isNew ? 0 : aggregated.totalFiller) + 
+        parseFloat(item.results['Filler Ф2#4'] || 0)
+      ),
+      totalElectrode: this.roundToThreeDecimals(
+        (isNew ? 0 : aggregated.totalElectrode) + 
+        parseFloat(item.results['Elec# Ф2#5'] || 0) + 
+        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
+        parseFloat(item.results['Elec# Ф4'] || 0)
+      )
+    };
+    return newItem;
+  }
+
   constructor() {
     this.pipes = [];
     this.initDOM();
@@ -68,10 +92,10 @@ class PipeCalculator {
           electrode: item.results.Electrode,
           filler: item.results.Filler,
           totalJoints: parseFloat(item.quantity),
-          totalFiller: parseFloat(item.results['Filler Ф2#4'] || 0),
-          totalElectrode: parseFloat(item.results['Elec# Ф2#5'] || 0) + 
-                        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
-                        parseFloat(item.results['Elec# Ф4'] || 0)
+        totalFiller: parseFloat((item.results['Filler Ф2#4'] || 0).toFixed(3)),
+        totalElectrode: parseFloat((item.results['Elec# Ф2#5'] || 0).toFixed(3)) + 
+                      parseFloat((item.results['Elec# Ф3#25'] || 0).toFixed(3)) + 
+                      parseFloat((item.results['Elec# Ф4'] || 0).toFixed(3))
         };
       } else {
         aggregated[key].totalJoints += parseFloat(item.quantity);
@@ -257,10 +281,10 @@ class PipeCalculator {
 
     const gradeInfo = this.gradeData[grade];
     const results = {
-      'Filler Ф2#4': (pipe['Filler Ф2#4'] * quantity).toFixed(8),
-      'Elec# Ф2#5': (pipe['Elec# Ф2#5'] * quantity).toFixed(8),
-      'Elec# Ф3#25': (pipe['Elec# Ф3#25'] * quantity).toFixed(8),
-      'Elec# Ф4': (pipe['Elec# Ф4'] * quantity).toFixed(8),
+      'Filler Ф2#4': this.roundToThreeDecimals(pipe['Filler Ф2#4'] * quantity),
+      'Elec# Ф2#5': this.roundToThreeDecimals(pipe['Elec# Ф2#5'] * quantity),
+      'Elec# Ф3#25': this.roundToThreeDecimals(pipe['Elec# Ф3#25'] * quantity),
+      'Elec# Ф4': this.roundToThreeDecimals(pipe['Elec# Ф4'] * quantity),
       'Electrode': gradeInfo.electrode,
       'Filler': gradeInfo.filler
     };
@@ -287,9 +311,9 @@ class PipeCalculator {
                 
                 card.innerHTML = `
                     <h3 class="font-semibold text-gray-700">${key}</h3>
-                    <p class="text-2xl font-bold text-blue-600 mt-2">${val} KG</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-2">${parseFloat(val).toFixed(3)} KG</p>
                     <p class="text-sm text-gray-500 mt-1">
-                        ${pipe[key]} KG/joint × ${quantity} joints = ${val} KG
+                        ${parseFloat(pipe[key]).toFixed(3)} KG/joint × ${quantity} joints = ${parseFloat(val).toFixed(3)} KG
                     </p>
                     ${additionalInfo}`;
                 this.resultsContainer.appendChild(card);
@@ -342,7 +366,7 @@ class PipeCalculator {
         <div class="mt-2 grid grid-cols-2 gap-2">
           ${Object.entries(item.results)
             .filter(([_, v]) => parseFloat(v) > 0)
-            .map(([k, v]) => `<div class="text-sm"><span class="font-medium">${k}:</span> ${v} KG</div>`)
+            .map(([k, v]) => `<div class="text-sm"><span class="font-medium">${k}:</span> ${parseFloat(v).toFixed(3)} KG</div>`)
             .join('')}
         </div>`;
       this.historyContainer.appendChild(div);
@@ -367,23 +391,17 @@ class PipeCalculator {
     const aggregated = {};
     history.forEach(item => {
       const key = `${item.results.Electrode}|${item.results.Filler}`;
-      if (!aggregated[key]) {
-        aggregated[key] = {
-          electrode: item.results.Electrode,
-          filler: item.results.Filler,
-          totalJoints: parseFloat(item.quantity),
-          totalFiller: parseFloat(item.results['Filler Ф2#4'] || 0),
-          totalElectrode: parseFloat(item.results['Elec# Ф2#5'] || 0) + 
-                        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
-                        parseFloat(item.results['Elec# Ф4'] || 0)
-        };
-      } else {
-        aggregated[key].totalJoints += parseFloat(item.quantity);
-        aggregated[key].totalFiller += parseFloat(item.results['Filler Ф2#4'] || 0);
-        aggregated[key].totalElectrode += parseFloat(item.results['Elec# Ф2#5'] || 0) + 
-                                        parseFloat(item.results['Elec# Ф3#25'] || 0) + 
-                                        parseFloat(item.results['Elec# Ф4'] || 0);
-      }
+        if (!aggregated[key]) {
+          aggregated[key] = this.updateAggregatedValues({
+            electrode: item.results.Electrode,
+            filler: item.results.Filler,
+            totalJoints: 0,
+            totalFiller: 0,
+            totalElectrode: 0
+          }, item, true);
+        } else {
+          aggregated[key] = this.updateAggregatedValues(aggregated[key], item);
+        }
     });
 
     // Convert to CSV
